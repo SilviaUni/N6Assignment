@@ -17,7 +17,7 @@ public class Collision  {
 
 	public Collision() {
 
-	}
+	} 
 	public static boolean handleTileMapCollisions(long elapsed, TileMap tmap, Player player, float gravity)
 	{
 		boolean canJump = true;
