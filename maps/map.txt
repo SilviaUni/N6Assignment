@@ -1,0 +1,29 @@
+300 13 32 32
+// The first line should contain the width and height of the
+// map and the width and height of each tile. A list of character to
+// tile mappings is then provided where each character is preceded by a
+// # character. The dot character always defaults to a blank space 
+// Note that the referenced files should be in the same directory as the
+// tile map.
+#b=buttom.png
+#t=top1.png
+#d=top2.png
+#w=water.png
+// The actual tile map is preceded by the #map line
+#map
+............................................................................................................................................................................................................................................................................................................
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+b....b..d...bb..d....bb.....btb............bbbbb....bbb....btttb..d...d....bbbbbb.........b.......bb........btttb......bbb.........bb..........bbtbb........btbtbtb.............bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb...btb...bbb........bt......bbb..........btb.............btttb..bbb.btb......btttttttttttttt
+b....t......db.......bd......d..............btb.....bbb....dtttd............bbbb..........d........d.........btb........d...........d...........btb.........btb......................bttb.................btb.......d....btb.........d......dtd...........d...............bdb.........d.......dddddbbbbbbbbb
+d....d.......t.......b...........bbb.........d......btb......d...............bb...............................d.................................btb..........d.........................d...................d..............d..................d............................d.d............................ddd
+.............d.......d...........btb.................d.......................d...................................................................b..........................................................................................................................................................
+b................................bbb.............................................................................................................d................bbttb.....................................................................................................................................
+b................................................................................................................................................................b......................................................................bb..................................................................
+b......btb.................................................................................b.............................................bbb....................b.............bbbbbbb.......................................bbbbbbbb..bb...b...........................bbb..................................
+b....b....................................b.........b................bb..bb...............b.....................bbbbbb...............bb....................................b.....................bbb..b...............bbbb....................bb.....................bb.....................................
+b.b.............b..b.......b..b..........bbb.....b......bb..b.....b..............bb.....btb...........bb.......bb...............bbb...........................b...........b.....................bbwwwwbb..........bb..............................bbb.......................................................
+b..............bb..b......bb..b.........bbbb....b......bb...b...................bbbb............b.............bbb..............................bbbbbbbbbbbbb.bb..bb............................bbbwwwwbb........bb.............................................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbwwbbbbbbbwwbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbwwwbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbwwbbb..bbbbbbbbbwwwwbbbbbbbbbb...............bbbbbbbbbbbbbbbbbwwbbbbbbbbbbbbbbbb..bbbbbbbbbbbbbbbwwwwbbbbbbbbbbbbwwwwwwww.......................bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+
+
+
