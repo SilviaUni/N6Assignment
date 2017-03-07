@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.Random;
 
 import javax.swing.JOptionPane;
 
@@ -39,6 +40,7 @@ public class Game extends GameCore
 	boolean left = false;
 	boolean right = false;
 	boolean isStanding = false;
+	boolean firstDraw = true;
 
 	// Game resources
 	CustomAnimation standing;
@@ -122,15 +124,15 @@ public class Game extends GameCore
 
 		// Create 5 clouds at random positions off the screen
 		// to the right
-	
-			for (int c=0; c<3; c++) {
-				s = new CustomSprite(ca);
-				s.setX(screenWidth + (int)(Math.random()*200.0f));
-				s.setY(20 + (int)(Math.random()*150.0f));
-				s.setVelocityX(-0.02f);
-				s.show();
-				floatingSpikes.add(s);
-			}
+
+		for (int c=0; c<3; c++) {
+			s = new CustomSprite(ca);
+			s.setX(screenWidth + (int)(Math.random()*200.0f));
+			s.setY(20 + (int)(Math.random()*150.0f));
+			s.setVelocityX(-0.02f);
+			s.show();
+			floatingSpikes.add(s);
+		}
 		//initial position of the first monster - ghost
 		for (int i=0; i < GHOST_COUNT; i++)
 		{
@@ -140,6 +142,9 @@ public class Game extends GameCore
 			ghosts.add(g);
 		}
 
+		// play music
+		Sound soundBack = new Sound("sounds/Grasslands_Theme.wav");
+		soundBack.start();
 		initialiseGame();
 
 		System.out.println(tmap);
@@ -150,9 +155,7 @@ public class Game extends GameCore
 	 * a separate method so that you can call it to restart
 	 * the game.
 	 */
-	public void initialiseGame()
-	{
-
+	public void initialiseGame() {
 		total = 0;
 
 		int ghostHeight = ghosts.get(0).getHeight();
@@ -242,21 +245,21 @@ public class Game extends GameCore
 
 		//draw ghost
 		for (CustomSprite ghost: ghosts) {
-			if ((Collision.boundingBoxCollision(player, ghost)
-					&& Collision.boundingCicleCollision(player, ghost)) == false && !ghost.isDead()){
+			if (!ghost.isDead()){
 				ghost.setOffsets(xo,yo);
 				ghost.draw(g);
 				increaseTotal = true;
 			}
 			else {
-				ghost.setDead(true);
 				ghost.setOffsets(xo, yo);
 				if (ghost.isDead()) {
-					ghost.setRotation(80f);
+					if (ghost.getRotation() < 80f) {
+						ghost.setY(ghost.getY() + 0.2f);
+						ghost.setRotation(ghost.getRotation() + 2);
+					}
 					ghost.drawTransformed(g); 
 					ghost.setAnimationFrame(1);
 					ghost.setAnimationSpeed(0);
-					ghost.setX(50000f);    //put it outside the map 'vanish'
 				}
 				else {
 					ghost.draw(g);
@@ -266,6 +269,7 @@ public class Game extends GameCore
 		}
 		// Apply offsets to player and draw 
 		player.setOffsets(xo, yo);
+		//player.draw(g);
 		player.draw(g);
 
 		spikes.setOffsets(xo, yo);
@@ -315,24 +319,34 @@ public class Game extends GameCore
 	{
 		player.setAnimationSpeed(1.0f);
 
-		if (right && canJump) {
-			player.walkRight();
-			player.setAnimationSpeed(40);
-			right = false;
+		if (right) {
+			player.setWalkRightVelocity();
+			player.setTurnRight(true);
 		}
 
-		if (left && canJump) {
-			player.walkLeft();
-			player.setAnimationSpeed(40);
-			left = false;
+		if (left) {
+			player.setWalkLeftVelocity();
+			player.setTurnRight(false);
 		}
 
+		if (right && canJump && !jump) {
+			player.walk();
+			player.setAnimationSpeed(50);
+		}
+
+		if (left && canJump && !jump) {
+			player.walk();
+			player.setAnimationSpeed(50);
+
+		}
 		if (isStanding && canJump) {
 			player.stand();
 			player.setAnimationSpeed(100);
 		}
 
 		if (jump && canJump) {
+			Sound jumpSound = new Sound("sounds/jumpSounds.wav");
+			jumpSound.start();
 			player.isJump();
 			player.setAnimationSpeed(1.8f);
 			player.setVelocityY(-0.5f);
@@ -381,7 +395,7 @@ public class Game extends GameCore
 				s.update(elapsed);
 			}
 		}
-		
+
 		for (CustomSprite ghost: ghosts)
 			ghost.update(elapsed);
 
@@ -397,6 +411,8 @@ public class Game extends GameCore
 		if (Collision.boundingBoxCollision(player, spikes)){
 			player.dying();
 			player.isDead();
+			Sound pokingSound = new Sound("sounds/screaming.wav");
+			pokingSound.start();
 			JOptionPane.showMessageDialog(null, "You have been poked! :( ");
 			stop();
 		}
@@ -405,22 +421,30 @@ public class Game extends GameCore
 		if (Collision.boundingBoxCollision(player, iceMonster) && !iceMonster.isDead()){
 			jump = Collision.boundingBoxCollision(player, iceMonster);
 			total += 100;
+			Sound nope = new Sound("sounds/no01.wav");
+			nope.start();
 		}
 
 		for (CustomSprite enemyGhost : ghosts ){
-			if (Collision.collisionTop(player, enemyGhost)){
+			System.out.println(enemyGhost.isDead());
+			if (Collision.collisionTop(player, enemyGhost) && !enemyGhost.isDead()){
 				jump = true;
+				canJump = true;
 				total += 100;
+				Sound nope = new Sound("sounds/no01.wav");
+				nope.start();
+				enemyGhost.setDead(true);
+			} else if (Collision.boundingBoxCollision(player, enemyGhost) && !enemyGhost.isDead()) {
+				player.setDead(true);
 			}
 		}
-		
+
 		for (CustomSprite floatinSpikes : floatingSpikes ){
-			if (Collision.collisionBottom(player, floatinSpikes)){
-				jump = true;
-				//total += 100;
+			if (Collision.boundingBoxCollision(player, floatinSpikes)){
+				player.dying();
 			}
 		}
-		
+
 		if (Collision.boundingBoxCollision(player, finalSpookje)){
 			jump = Collision.boundingBoxCollision(player, finalSpookje);
 			JOptionPane.showMessageDialog(null, "Gratz! You have killed the final Spookje! You have gathered " + total);
@@ -456,11 +480,9 @@ public class Game extends GameCore
 			isStanding = false;
 		}
 
-		if (key == KeyEvent.VK_S) {
-			// Example of playing a sound as a thread
-			Sound s = new Sound("sounds/caw.wav");
-			s.start();
-		}
+		/**if (key == KeyEvent.VK_S) {
+			
+		}*/
 	}
 
 	public void keyReleased(KeyEvent e) { 
@@ -484,5 +506,5 @@ public class Game extends GameCore
 		default :  break;
 		}
 	}
-	
+
 }

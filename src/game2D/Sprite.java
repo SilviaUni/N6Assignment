@@ -16,8 +16,8 @@ public class Sprite {
     private Animation anim;		
 
     // Position (pixels)
-    private float x;
-    private float y;
+    protected float x;
+    protected float y;
 
     // Velocity (pixels per millisecond)
     private float dx;
@@ -29,17 +29,17 @@ public class Sprite {
     private float radius;
 
     // The scale to draw the sprite at where 1 equals normal size
-    private double scale;
+    protected double scale;
     // The rotation to apply to the sprite image
-    private double rotation;
+    protected double rotation;
 
     // If render is 'true', the sprite will be drawn when requested
-    private boolean render;
+    protected boolean render;
     
     // The draw offset associated with this sprite. Used to draw it
     // relative to specific on screen position (usually the player)
-    private int xoff=0;
-    private int yoff=0;
+    protected int xoff=0;
+    protected int yoff=0;
 
     /**
      *  Creates a new Sprite object with the specified Animation.

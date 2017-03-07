@@ -2,6 +2,7 @@ import java.util.Random;
 
 import javax.swing.JOptionPane;
 
+import game2D.Sound;
 import game2D.Tile;
 import game2D.TileMap;
 
@@ -75,6 +76,8 @@ public class Collision  {
 			}
 		}
 		catch (Exception e) {
+			Sound byeBye = new Sound("sounds/Bye_Have_a_Great_Time.wav");
+			byeBye.start();
 			JOptionPane.showMessageDialog(null, "You fall off the map, try again!");
 			System.exit(0);
 		}
@@ -110,18 +113,18 @@ public class Collision  {
 			float sprite2Top = s2.getY();
 
 			if(sprite1Bottom - sprite2Top <= 5){
-				s2.setDead(true);
+				//s2.setDead(true);
 				return true;
 			}
 		}
 		return false;
 	}
 	
-	//collision sued for the floating spikes
+	//collision used for the floating spikes
 	public static boolean collisionBottom(Player s1, CustomSprite s2) {
 		if (boundingBoxCollision(s1, s2)) {
 			float sprite1Top = s1.getY();
-			float sprite2Bottom = s2.getY()- s1.getHeight();
+			float sprite2Bottom = s2.getY()+ s1.getHeight();
 
 			if(sprite1Top - sprite2Bottom <= 5){
 				s1.setDead(true);

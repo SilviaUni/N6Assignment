@@ -19,20 +19,10 @@ public class Player extends CustomSprite {
 		super(anim);
 	}
 	
-	public void walkRight() {
+	public void walk() {
 		animation = new CustomAnimation();
 		animation.loadAnimation(PLAYER_PATH + "walking", 7, "png", 160);
 		setAnimation(animation);
-		setVelocityX(WALKING_SPEED);
-		playAnimation();
-	}
-	
-	public void walkLeft() {
-		animation = new CustomAnimation();
-		animation.loadAnimation(PLAYER_PATH + "walkingLeft", 7, "png", 160);
-		setAnimation(animation);
-		setVelocityX(-WALKING_SPEED);
-		playAnimation();
 	}
 	
 	public void stand() {
@@ -40,7 +30,6 @@ public class Player extends CustomSprite {
 		animation.loadAnimation(PLAYER_PATH + "standing", 1, "png", 160);
 		setAnimation(animation);
 		setVelocityX(0);
-		playAnimation();
 	}
 	
 	public void dying(){
@@ -48,19 +37,24 @@ public class Player extends CustomSprite {
 		animation.loadAnimation(PLAYER_PATH + "dying", 1, "png", 160);
 		setAnimation(animation);
 		setVelocityX(0);
-		playAnimation();
 	}
 	
 	public void isJump() {
 		animation = new CustomAnimation();
 		animation.loadAnimation(PLAYER_PATH + "jump", 10, "png", 160);
 		setAnimation(animation);
-		playAnimation();
-		
 	}
 	
 	public void setJumpVelocity(long elapsed) {
-		setVelocityY((float)(getVelocityY() + 0.0015 * elapsed) );
+		setVelocityY((float)(getVelocityY() + 0.0015 * elapsed));
+	}
+	
+	public void setWalkRightVelocity() {
+		setVelocityX(WALKING_SPEED);
+	}
+	
+	public void setWalkLeftVelocity() {
+		setVelocityX(-WALKING_SPEED);
 	}
 	
 	public CustomAnimation getCurrentAnimation() {
