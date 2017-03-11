@@ -17,10 +17,12 @@ import game2D.TileMap;
 public class Collision  {
 
 	public Collision() {
+		
 
 	}
 	public static boolean handleTileMapCollisions(long elapsed, TileMap tmap, Player player, float gravity)
 	{
+		Sound byeBye;
 		boolean canJump = true;
 		try {
 			// This method should check actual tile map collisions. For
@@ -76,7 +78,7 @@ public class Collision  {
 			}
 		}
 		catch (Exception e) {
-			Sound byeBye = new Sound("sounds/Bye_Have_a_Great_Time.wav");
+			byeBye = new Sound("sounds/Bye_Have_a_Great_Time.wav");
 			byeBye.start();
 			JOptionPane.showMessageDialog(null, "You fall off the map, try again!");
 			System.exit(0);
@@ -126,8 +128,7 @@ public class Collision  {
 			float sprite1Top = s1.getY();
 			float sprite2Bottom = s2.getY()+ s1.getHeight();
 
-			if(sprite1Top - sprite2Bottom <= 5){
-				s1.setDead(true);
+			if(sprite1Top <= sprite2Bottom ){
 				return true;
 			}
 		}

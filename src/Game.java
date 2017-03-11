@@ -1,5 +1,7 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -22,14 +24,14 @@ import game2D.*;
  */
 @SuppressWarnings("serial")
 
-public class Game extends GameCore 
+public class Game extends GameCore implements MouseListener 
 {
 	// Useful game constants
 	static int screenWidth = 512;
 	static int screenHeight = 416;
 
 	static int GHOST_COUNT = 3;
-
+	static int bossHealt = 3;  //final boss health
 
 	float 	lift = 0.005f;
 	float	gravity = 0.0001f;
@@ -41,6 +43,7 @@ public class Game extends GameCore
 	boolean right = false;
 	boolean isStanding = false;
 	boolean firstDraw = true;
+	boolean gameOver = false;
 
 	// Game resources
 	CustomAnimation standing;
@@ -52,6 +55,16 @@ public class Game extends GameCore
 	CustomSprite iceMonster;
 	CustomAnimation finalSpookjes;
 	CustomSprite finalSpookje;
+
+	//Sound
+	Sound soundBack;
+	Sound nope;
+	Sound jumpSound;
+	Sound pokingSound;
+
+	//mouse event
+	double mouseButtonX = 0;
+	double mouseButtonY = 0;
 
 	Player	player = null;
 	ArrayList<CustomSprite> ghosts = new ArrayList<CustomSprite>();
@@ -82,8 +95,7 @@ public class Game extends GameCore
 	 * Initialise the class, e.g. set up variables, load images,
 	 * create animations, register event handlers
 	 */
-	public void init()
-	{        
+	public void init() {        
 
 		CustomSprite s;	// Temporary reference to a sprites
 		CustomSprite g;
@@ -122,13 +134,11 @@ public class Game extends GameCore
 		Animation ca = new Animation();
 		ca.addFrame(loadImage("images/floatingSpikes.png"), 1000);
 
-		// Create 5 clouds at random positions off the screen
-		// to the right
-
+		// Create 3 spikes at random positions off the screen to the right
 		for (int c=0; c<3; c++) {
 			s = new CustomSprite(ca);
 			s.setX(screenWidth + (int)(Math.random()*200.0f));
-			s.setY(20 + (int)(Math.random()*150.0f));
+			s.setY(29 + (int)(Math.random()*150.0f));
 			s.setVelocityX(-0.02f);
 			s.show();
 			floatingSpikes.add(s);
@@ -143,7 +153,7 @@ public class Game extends GameCore
 		}
 
 		// play music
-		Sound soundBack = new Sound("sounds/Grasslands_Theme.wav");
+		soundBack = new Sound("sounds/Grasslands_Theme.wav");
 		soundBack.start();
 		initialiseGame();
 
@@ -217,8 +227,7 @@ public class Game extends GameCore
 	/**
 	 * Draw the current state of the game
 	 */
-	public void draw(Graphics2D g)
-	{    	
+	public void draw(Graphics2D g){    	
 		// Be careful about the order in which you draw objects - you
 		// should draw the background first, then work your way 'forward'
 		// in order to see where the player is.
@@ -236,12 +245,6 @@ public class Game extends GameCore
 		bgImage2.draw(g);
 		bgImage.setOffsets(xo, yo);
 		bgImage2.setOffsets(xo, yo);
-
-		// Apply offsets to sprites then draw them
-		for (CustomSprite s: floatingSpikes) {
-			s.setOffsets(xo,yo);
-			s.draw(g);
-		}
 
 		//draw ghost
 		for (CustomSprite ghost: ghosts) {
@@ -269,7 +272,6 @@ public class Game extends GameCore
 		}
 		// Apply offsets to player and draw 
 		player.setOffsets(xo, yo);
-		//player.draw(g);
 		player.draw(g);
 
 		spikes.setOffsets(xo, yo);
@@ -277,36 +279,54 @@ public class Game extends GameCore
 		spikes1.setOffsets(xo, yo);
 		spikes1.draw(g);
 
-		if ((Collision.boundingBoxCollision(player, iceMonster)
-				&& Collision.boundingCicleCollision(player, iceMonster))== false && !iceMonster.isDead()){
+		if (!iceMonster.isDead()){
 			iceMonster.setOffsets(xo, yo);
 			iceMonster.draw(g);
 			increaseTotal = true;
 		}
 		else {
-			iceMonster.setRotation(80f);
-			iceMonster.drawTransformed(g); 
 			iceMonster.setOffsets(xo, yo);
+			if (iceMonster.isDead()) {
+				if (iceMonster.getRotation() <80f) {
+					iceMonster.setY(iceMonster.getY() + 0.2f);
+					iceMonster.setRotation(iceMonster.getRotation() + 2);
+				}
+			}
+			iceMonster.drawTransformed(g); 
 			iceMonster.setAnimationFrame(1);
 			iceMonster.setAnimationSpeed(0);
-			jump = false;
 			if (!iceMonster.isDead()) {
 				iceMonster.setDead(true);
 				increaseTotal = false;
 			}
 		}
-
 		finalSpookje.setOffsets(xo, yo);
 		finalSpookje.draw(g);
 
 		// Apply offsets to tile map and draw  it
-		tmap.draw(g,xo,yo);    
+		tmap.draw(g,xo,yo); 
+
+		// Apply offsets to sprites then draw them
+		for (CustomSprite s: floatingSpikes) {
+			if (!s.isDead()){
+				s.setOffsets(xo,yo);
+				s.draw(g);
+				s.setDead(false);
+			}
+		}
 
 		// Show score and status information
 		if (increaseTotal) {
 			String msg = String.format("Score: %d", total);
 			g.setColor(Color.white);
 			g.drawString(msg, getWidth() - 70, 90);
+		}
+
+		if (gameOver == true) {
+			g.setColor(Color.black);
+			g.fillRect(0, 0, this.getWidth(), this.getHeight());
+			g.setColor(Color.white);
+			g.drawString("Game Over!", this.getWidth()/2, this.getHeight()/2);
 		}
 	}
 
@@ -343,9 +363,15 @@ public class Game extends GameCore
 			player.stand();
 			player.setAnimationSpeed(100);
 		}
+		//teleport the player
+		if(mouseButtonX != 0 && mouseButtonY != 0){
+			mouseButtonX = 0;
+			mouseButtonY = 0;
+			player.update(elapsed);
+		}
 
 		if (jump && canJump) {
-			Sound jumpSound = new Sound("sounds/jumpSounds.wav");
+			jumpSound = new Sound("sounds/jumpSounds.wav");
 			jumpSound.start();
 			player.isJump();
 			player.setAnimationSpeed(1.8f);
@@ -411,37 +437,56 @@ public class Game extends GameCore
 		if (Collision.boundingBoxCollision(player, spikes)){
 			player.dying();
 			player.isDead();
-			Sound pokingSound = new Sound("sounds/screaming.wav");
+			pokingSound = new Sound("sounds/screaming.wav");
 			pokingSound.start();
-			JOptionPane.showMessageDialog(null, "You have been poked! :( ");
-			stop();
+			gameOver = true;
 		}
 
 		//Collision with ice monster
-		if (Collision.boundingBoxCollision(player, iceMonster) && !iceMonster.isDead()){
-			jump = Collision.boundingBoxCollision(player, iceMonster);
+		if (Collision.collisionTop(player, iceMonster) && !iceMonster.isDead()){
+			jump = true;
+			canJump = true;
 			total += 100;
-			Sound nope = new Sound("sounds/no01.wav");
+			nope = new Sound("sounds/no01.wav");
 			nope.start();
-		}
+			iceMonster.setDead(true);
+		} 
 
 		for (CustomSprite enemyGhost : ghosts ){
-			System.out.println(enemyGhost.isDead());
 			if (Collision.collisionTop(player, enemyGhost) && !enemyGhost.isDead()){
 				jump = true;
 				canJump = true;
 				total += 100;
-				Sound nope = new Sound("sounds/no01.wav");
+				nope = new Sound("sounds/no01.wav");
 				nope.start();
 				enemyGhost.setDead(true);
 			} else if (Collision.boundingBoxCollision(player, enemyGhost) && !enemyGhost.isDead()) {
+				if ( total !=0) {
+					total -= 100;
+					player.setX(player.getX() + 25f);		
+				}
+				player.dying();	
 				player.setDead(true);
+				gameOver = true;
 			}
 		}
 
-		for (CustomSprite floatinSpikes : floatingSpikes ){
-			if (Collision.boundingBoxCollision(player, floatinSpikes)){
-				player.dying();
+		for (CustomSprite floatinSpikess : floatingSpikes ){
+			if(mouseButtonX >= floatinSpikess.getX() && mouseButtonY >= floatinSpikess.getY()){
+				nope = new Sound("sounds/no01.wav");
+				nope.start();
+				floatinSpikess.setDead(true);
+			}
+			if (Collision.collisionBottom(player, floatinSpikess)){
+				if ( total != 0) {
+					total -= 100;
+					player.setY(player.getY() - 50f);		
+				}
+				player.dying();	
+				player.setDead(true);
+				if (player.isDead()){
+					gameOver = true;
+				}
 			}
 		}
 
@@ -449,9 +494,13 @@ public class Game extends GameCore
 			jump = Collision.boundingBoxCollision(player, finalSpookje);
 			JOptionPane.showMessageDialog(null, "Gratz! You have killed the final Spookje! You have gathered " + total);
 		}
+
+		//repeat sound
+		if (soundBack.finished) {
+			soundBack = new Sound("sounds/Grasslands_Theme.wav");
+			soundBack.start();
+		}
 	}
-
-
 	/**
 	 * Override of the keyPressed event defined in GameCore to catch our
 	 * own events
@@ -479,10 +528,6 @@ public class Game extends GameCore
 			left = false;
 			isStanding = false;
 		}
-
-		/**if (key == KeyEvent.VK_S) {
-			
-		}*/
 	}
 
 	public void keyReleased(KeyEvent e) { 
@@ -505,6 +550,43 @@ public class Game extends GameCore
 		break;
 		default :  break;
 		}
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+
+
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		int key = e.getButton();
+		//System.out.println("Key "+ key);
+		mouseButtonX = e.getX();
+		mouseButtonY = e.getY();
+
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		int key = e.getButton();
+
+		switch (key){
+		case MouseEvent.BUTTON1 : ;
+		}
+
 	}
 
 }
